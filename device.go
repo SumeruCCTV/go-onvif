@@ -1,7 +1,6 @@
 package onvif
 
 import (
-	"github.com/golang/glog"
 	"strings"
 )
 
@@ -71,7 +70,6 @@ func (device Device) GetNetworkInterfaces() ([]NetworkInterface, error) {
 	result := make([]NetworkInterface, 0)
 	for _, networkInterfacesInfo := range networkInterfacesInfos {
 		if mapNetworkInterfacesInfo, ok := networkInterfacesInfo.(map[string]interface{}); ok {
-			glog.Infof("mapNetworkInterfacesInfo %v", mapNetworkInterfacesInfo)
 			networkInterface := NetworkInterface{}
 			networkInterface.Token = interfaceToString(mapNetworkInterfacesInfo["-token"])
 			networkInterface.Enabled = interfaceToBool(mapNetworkInterfacesInfo["Enabled"])
@@ -309,7 +307,7 @@ func (device Device) GetScopes() ([]string, error) {
 	}
 
 	// Convert interface to array of scope
-	scopes := []string{}
+	var scopes []string
 	for _, ifaceScope := range ifaceScopes {
 		if mapScope, ok := ifaceScope.(map[string]interface{}); ok {
 			scope := interfaceToString(mapScope["ScopeItem"])
@@ -758,7 +756,7 @@ func (device Device) GetNetworkProtocols() ([]NetworkProtocol, error) {
 		Body:     `<GetNetworkProtocols xmlns:="http://www.onvif.org/ver10/device/wsdl"/>`,
 	}
 
-	result := []NetworkProtocol{}
+	var result []NetworkProtocol
 	// send request
 	response, err := soap.SendRequest(device.XAddr)
 	if err != nil {
@@ -966,7 +964,7 @@ func (device Device) GetUsers() ([]User, error) {
 		Body:     `<GetUsers xmlns="http://www.onvif.org/ver10/device/wsdl"/>`,
 	}
 
-	result := []User{}
+	var result []User
 
 	// send request
 	response, err := soap.SendRequest(device.XAddr)
@@ -1150,7 +1148,6 @@ func (device Device) GetZeroConfiguration() (NetworkZeroConfiguration, error) {
 		}
 	}
 
-	glog.Info(result)
 	return result, nil
 }
 
@@ -1162,7 +1159,7 @@ func (device Device) GetServices() ([]Service, error) {
 		Body:     `<GetServices xmlns="http://www.onvif.org/ver10/device/wsdl"><IncludeCapability>false</IncludeCapability></GetServices>`,
 	}
 
-	result := []Service{}
+	var result []Service
 
 	//send request
 	response, err := soap.SendRequest(device.XAddr)
@@ -1204,7 +1201,7 @@ func (device Device) GetServiceCapabilities() ([]Service, error) {
 		Body:     `<GetServices xmlns="http://www.onvif.org/ver10/device/wsdl"><IncludeCapability>true</IncludeCapability></GetServices>`,
 	}
 
-	result := []Service{}
+	var result []Service
 
 	//send request
 	response, err := soap.SendRequest(device.XAddr)

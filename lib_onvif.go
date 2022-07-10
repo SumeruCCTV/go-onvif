@@ -2,7 +2,6 @@ package onvif
 
 import (
 	"encoding/json"
-	"github.com/golang/glog"
 	"net"
 	"time"
 )
@@ -71,7 +70,6 @@ func DiscoveryDevice(interfaceName string, duration int) string {
 	return string(str)
 }
 
-// DiscoveryDevice send a WS-Discovery message and wait for all matching device to respond
 func GetMediaInformation(host, username, password string) string {
 	result := OnvifData{}
 	profile := CameraProfile{}
@@ -94,7 +92,6 @@ func GetMediaInformation(host, username, password string) string {
 	caps, err := od.GetCapabilities()
 	if err != nil {
 		profile.LastError = "profile.onvif.getcapabilities.error"
-		glog.Warning("Get capabilities error")
 
 		result.Error = "res.error.getcapabilities"
 		result.Data = profile
@@ -119,7 +116,6 @@ func GetMediaInformation(host, username, password string) string {
 
 	if err != nil {
 		profile.LastError = "profile.onvif.getprofiles.error"
-		glog.Warning("Get profiles error")
 		result.Error = "res.error.getprofiles"
 		result.Data = profile
 		str, _ := json.Marshal(result)
@@ -127,12 +123,10 @@ func GetMediaInformation(host, username, password string) string {
 	}
 
 	for _, ovfprofile := range profiles {
-		glog.Infof("Get profile %s", ovfprofile.Token)
 		// Get streaming uri
 		uri, err := odm.GetStreamURI(ovfprofile.Token, "RTSP")
 
 		if err != nil {
-			glog.Warning("Get streaming error")
 			continue
 		}
 
@@ -145,7 +139,6 @@ func GetMediaInformation(host, username, password string) string {
 
 		if err != nil {
 			profile.LastError = "profile.onvif.getsnapshot.error"
-			glog.Warningf("Get snapshot for %s error %v", ovfprofile.Token, err)
 		}
 
 		profile.Streams = append(profile.Streams, Stream{
@@ -161,7 +154,6 @@ func GetMediaInformation(host, username, password string) string {
 			VideoSourceToken: ovfprofile.VideoSourceConfig.Token,
 		})
 
-		glog.Infof("Get profile %s done", ovfprofile.Token)
 	}
 
 	profile.Authorize = true
@@ -205,7 +197,6 @@ func PtzStart(host, username, password string, x, y, z float64) string {
 	ptzXAddr := mapPtzXAddr[od.XAddr]
 	mediaXAddr := mapMediaXAddr[od.XAddr]
 	if ptzXAddr == "" || mediaXAddr == "" {
-		glog.Info("Find PTZ And Media Address")
 		caps, err := GetXAddress(od)
 		if err != nil {
 			if CheckAuthorizedError(err.Error()) {
@@ -222,7 +213,6 @@ func PtzStart(host, username, password string, x, y, z float64) string {
 	// get profile
 	profileToken := mapProfile[od.XAddr]
 	if profileToken == "" {
-		glog.Info("Find Profile")
 		// Media device control
 		odMedia := Device{
 			XAddr:    mediaXAddr,
@@ -231,7 +221,6 @@ func PtzStart(host, username, password string, x, y, z float64) string {
 		}
 		profiles, err := odMedia.GetProfiles()
 		if err != nil {
-			glog.Info(err)
 			if CheckAuthorizedError(err.Error()) {
 				result.Error = "res.error.unauthorized"
 			} else {
@@ -243,8 +232,6 @@ func PtzStart(host, username, password string, x, y, z float64) string {
 		mapProfile[od.XAddr] = profiles[0].Token
 		profileToken = mapProfile[od.XAddr]
 	}
-	glog.Info("PTZ XAddr: ", ptzXAddr)
-	glog.Info("Profile Token: ", profileToken)
 	// PTZ device control
 	odPtz := Device{
 		XAddr:    ptzXAddr,
@@ -261,7 +248,6 @@ func PtzStart(host, username, password string, x, y, z float64) string {
 		},
 	})
 	if err != nil {
-		glog.Warning("PTZ Start Error: ", err.Error())
 		if CheckAuthorizedError(err.Error()) {
 			result.Error = "res.error.unauthorized"
 		} else {
@@ -287,7 +273,6 @@ func PtzStop(host, username, password string) string {
 	ptzXAddr := mapPtzXAddr[od.XAddr]
 	mediaXAddr := mapMediaXAddr[od.XAddr]
 	if ptzXAddr == "" || mediaXAddr == "" {
-		glog.Info("Find PTZ And Media Address")
 
 		caps, err := GetXAddress(od)
 		if err != nil {
@@ -306,7 +291,6 @@ func PtzStop(host, username, password string) string {
 	// get profile
 	profileToken := mapProfile[od.XAddr]
 	if profileToken == "" {
-		glog.Info("Find Profile")
 		// Media device control
 		odMedia := Device{
 			XAddr:    mediaXAddr,
@@ -315,7 +299,6 @@ func PtzStop(host, username, password string) string {
 		}
 		profiles, err := odMedia.GetProfiles()
 		if err != nil {
-			glog.Info(err)
 			if CheckAuthorizedError(err.Error()) {
 				result.Error = "res.error.unauthorized"
 			} else {
@@ -327,8 +310,6 @@ func PtzStop(host, username, password string) string {
 		mapProfile[od.XAddr] = profiles[0].Token
 		profileToken = mapProfile[od.XAddr]
 	}
-	glog.Info("PTZ XAddr: ", ptzXAddr)
-	glog.Info("Profile Token: ", profileToken)
 	// PTZ device control
 	odPtz := Device{
 		XAddr:    ptzXAddr,
@@ -337,7 +318,6 @@ func PtzStop(host, username, password string) string {
 	}
 	err := odPtz.Stop(profileToken)
 	if err != nil {
-		glog.Warning("PTZ Stop Error: ", err.Error())
 		if CheckAuthorizedError(err.Error()) {
 			result.Error = "res.error.unauthorized"
 		} else {
@@ -363,7 +343,6 @@ func PtzGoToHome(host, username, password string) string {
 	ptzXAddr := mapPtzXAddr[od.XAddr]
 	mediaXAddr := mapMediaXAddr[od.XAddr]
 	if ptzXAddr == "" || mediaXAddr == "" {
-		glog.Info("Find PTZ And Media Address")
 
 		caps, err := GetXAddress(od)
 		if err != nil {
@@ -382,7 +361,6 @@ func PtzGoToHome(host, username, password string) string {
 	// get profile
 	profileToken := mapProfile[od.XAddr]
 	if profileToken == "" {
-		glog.Info("Find Profile")
 		// Media device control
 		odMedia := Device{
 			XAddr:    mediaXAddr,
@@ -391,7 +369,6 @@ func PtzGoToHome(host, username, password string) string {
 		}
 		profiles, err := odMedia.GetProfiles()
 		if err != nil {
-			glog.Info(err)
 			if CheckAuthorizedError(err.Error()) {
 				result.Error = "res.error.unauthorized"
 			} else {
@@ -403,8 +380,6 @@ func PtzGoToHome(host, username, password string) string {
 		mapProfile[od.XAddr] = profiles[0].Token
 		profileToken = mapProfile[od.XAddr]
 	}
-	glog.Info("PTZ XAddr: ", ptzXAddr)
-	glog.Info("Profile Token: ", profileToken)
 	// PTZ device control
 	odPtz := Device{
 		XAddr:    ptzXAddr,
@@ -413,7 +388,6 @@ func PtzGoToHome(host, username, password string) string {
 	}
 	err := odPtz.GotoHomePosition(profileToken)
 	if err != nil {
-		glog.Warning("PTZ Stop Error: ", err.Error())
 		if CheckAuthorizedError(err.Error()) {
 			result.Error = "res.error.unauthorized"
 		} else {

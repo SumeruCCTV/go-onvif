@@ -3,7 +3,6 @@ package onvif
 import (
 	"errors"
 	"github.com/clbanning/mxj"
-	"github.com/golang/glog"
 	"github.com/google/uuid"
 	"net"
 	"regexp"
@@ -189,7 +188,6 @@ func discoverDevices(ipAddr string, duration time.Duration) ([]Device, error) {
 
 // readDiscoveryResponse reads and parses WS-Discovery response
 func readDiscoveryResponse(messageID string, buffer []byte) (Device, error) {
-	glog.Infof("Discover response: %s", string(buffer))
 
 	// Inital result
 	result := Device{}
@@ -197,28 +195,22 @@ func readDiscoveryResponse(messageID string, buffer []byte) (Device, error) {
 	// Parse XML to map
 	mapXML, err := mxj.NewMapXml(buffer)
 	if err != nil {
-		glog.Warningf("Parse response error %v", err)
 		return result, err
 	}
 
 	// Check if this response is for our request
 	responseMessageID, err := mapXML.ValueForPath("Envelope.Header.RelatesTo")
 	if err != nil {
-		glog.Warningf("Parse message id error %v", err)
 		return result, err
 	}
 
 	if responseMessageMap, ok := responseMessageID.(map[string]interface{}); ok {
 		responseMessage := responseMessageMap["#text"].(string)
 		if responseMessage != messageID {
-			glog.Info(responseMessage)
-			glog.Info(messageID)
 			return result, errWrongDiscoveryResponse
 		}
 	} else {
 		if responseMessageID != messageID {
-			glog.Info(responseMessageID)
-			glog.Info(messageID)
 			return result, errWrongDiscoveryResponse
 		}
 	}
@@ -226,7 +218,6 @@ func readDiscoveryResponse(messageID string, buffer []byte) (Device, error) {
 	// Get device's ID and clean it
 	deviceID, _ := mapXML.ValueForPathString("Envelope.Body.ProbeMatches.ProbeMatch.EndpointReference.Address")
 	deviceID = strings.Replace(deviceID, "urn:uuid:", "", 1)
-	glog.Infof("Discover device id: %s", deviceID)
 
 	// Get device's name
 	deviceName := ""
@@ -242,9 +233,7 @@ func readDiscoveryResponse(messageID string, buffer []byte) (Device, error) {
 	// Get device's xAddrs
 	xAddrs, _ := mapXML.ValueForPathString("Envelope.Body.ProbeMatches.ProbeMatch.XAddrs")
 	listXAddr := strings.Split(xAddrs, " ")
-	glog.Infof("Discover address: %s", xAddrs)
 	if len(listXAddr) == 0 {
-		glog.Warning("Discover address len 0")
 		return result, errors.New("Device does not have any xAddr ")
 	}
 

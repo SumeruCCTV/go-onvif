@@ -1,7 +1,5 @@
 package onvif
 
-import "github.com/golang/glog"
-
 func (device Device) GetReplayConfiguration() (interface{}, error) {
 	// create soap
 	soap := SOAP{
@@ -10,19 +8,17 @@ func (device Device) GetReplayConfiguration() (interface{}, error) {
 		Body:     `<GetReplayConfiguration xmlns="http://www.onvif.org/ver10/replay/wsdl"/>`,
 	}
 
-	var result interface{}
 	// send request
 	response, err := soap.SendRequest(device.XAddr)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	// parse response
-	data, err := response.ValueForPath("Envelope.Body.GetReplayConfigurationResponse")
+	result, err := response.ValueForPath("Envelope.Body.GetReplayConfigurationResponse")
 	if err != nil {
 		return result, err
 	}
-	glog.Infof("Data %v", data)
 	return result, nil
 }
 
@@ -34,19 +30,17 @@ func (device Device) GetReplayServiceCapabilities() (interface{}, error) {
 		Body:     `<GetServiceCapabilities xmlns="http://www.onvif.org/ver10/replay/wsdl"/>`,
 	}
 
-	var result interface{}
 	// send request
 	response, err := soap.SendRequest(device.XAddr)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	// parse response
-	data, err := response.ValueForPath("Envelope.Body.GetServiceCapabilitiesResponse")
+	result, err := response.ValueForPath("Envelope.Body.GetServiceCapabilitiesResponse")
 	if err != nil {
 		return result, err
 	}
-	glog.Infof("Data %v", data)
 	return result, nil
 }
 

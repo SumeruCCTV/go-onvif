@@ -5,7 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"errors"
-	"github.com/quocson95/go-onvif/digest"
+	"github.com/SumeruCCTV/go-onvif/digest"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/clbanning/mxj"
-	"github.com/golang/glog"
 	"github.com/google/uuid"
 )
 
@@ -42,7 +41,6 @@ func (soap SOAP) SendRequest(xaddr string) (mxj.Map, error) {
 		urlXAddr.User = url.UserPassword(soap.User, soap.Password)
 	}
 	if !soap.NoDebug {
-		glog.Info(request)
 	}
 	// Create HTTP request
 	buffer := bytes.NewBuffer([]byte(request))
@@ -65,10 +63,6 @@ func (soap SOAP) SendRequest(xaddr string) (mxj.Map, error) {
 	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
-	}
-
-	if !soap.NoDebug {
-		glog.Infof("Onvif response: %s", string(responseBody))
 	}
 
 	// Parse XML to map

@@ -2,7 +2,6 @@ package onvif
 
 import (
 	"fmt"
-	"github.com/golang/glog"
 )
 
 var mediaXMLNs = []string{
@@ -270,7 +269,6 @@ func (device Device) GetVideoEncoderConfigurations() ([]VideoEncoderConfig, erro
 		}
 	}
 
-	glog.Info(result)
 	return result, nil
 }
 
@@ -1430,7 +1428,6 @@ func (device Device) GetAudioSourceConfigurations() ([]AudioSourceConfiguration,
 		}
 	}
 
-	glog.Info(result)
 	return result, nil
 }
 
@@ -1444,7 +1441,7 @@ func (device Device) GetCompatibleAudioSourceConfigurations(profileToken string)
 				</GetCompatibleAudioSourceConfigurations>`,
 	}
 
-	result := []AudioSourceConfiguration{}
+	var result []AudioSourceConfiguration
 
 	//send request
 	response, err := soap.SendRequest(device.XAddr)
@@ -1511,7 +1508,6 @@ func (device Device) GetAudioSourceConfigurationOptions(configurationToken strin
 		result = interfaceToString(mapAudioSourceConfigurationOption["InputTokensAvailable"])
 	}
 
-	glog.Info(result)
 	return result, nil
 }
 
@@ -1678,7 +1674,6 @@ func (device Device) GetAudioEncoderConfigurationOptions(configurationToken stri
 		}
 	}
 
-	glog.Info(result)
 	return result, nil
 }
 

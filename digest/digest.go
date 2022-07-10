@@ -49,9 +49,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/golang/glog"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"strings"
@@ -268,13 +266,7 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	chal := resp.Header.Get("WWW-Authenticate")
 	c, err := parseChallenge(chal)
 	if err != nil {
-		// Read response body
-		responseBody, errR := ioutil.ReadAll(resp.Body)
-		if errR == nil {
-			glog.Infof("Onvif response: %s", string(responseBody))
-			return resp, err
-		}
-		return resp, errR
+		return resp, err
 	}
 
 	// Form credentials based on the challenge.
